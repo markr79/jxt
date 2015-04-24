@@ -73,13 +73,13 @@ JXT.prototype.build = function (xml) {
     }
 };
 
-JXT.prototype.parse = function (str) {
+JXT.prototype.parse = function (str, namespaceURI) {
     var xml= ltx.parse(str);
     if (xml.nodeType !== 1) {
         return;
     }
 
-    var JXTClass = this.getDefinition(xml.localName, xml.namespaceURI);
+    var JXTClass = this.getDefinition(xml.localName, namespaceURI || xml.namespaceURI);
     if (JXTClass) {
         return new JXTClass(null, xml);
     }
