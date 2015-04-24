@@ -11,6 +11,7 @@ var stanzaConstructor = require('./lib/stanza');
 
 function JXT() {
     this._LOOKUP = {};
+    this._LOOKUP_NO_NS = {};
     this._LOOKUP_EXT = {};
     this._TAGS = {};
     this._CB_DEFINITION = {};
@@ -27,8 +28,12 @@ JXT.prototype.use = function (init) {
     return this;
 };
 
-JXT.prototype.getDefinition = function (el, ns, required) {
+JXT.prototype.getDefinition = function (el, ns, required, allowNoNamespace) {
     var JXTClass = this._LOOKUP[ns + '|' + el];
+
+    if (allowNoNamespace && !JXTClass) {
+      JXTClass = this._LOOKUP_NO_NS[el];
+    }
     if (required && !JXTClass) {
         throw new Error('Could not find definition for <' + el + ' xmlns="' + ns + '" />');
     }
@@ -73,13 +78,13 @@ JXT.prototype.build = function (xml) {
     }
 };
 
-JXT.prototype.parse = function (str, namespaceURI) {
+JXT.prototype.parse = function (str, allowNoNamespace) {
     var xml= ltx.parse(str);
     if (xml.nodeType !== 1) {
         return;
     }
 
-    var JXTClass = this.getDefinition(xml.localName, namespaceURI || xml.namespaceURI);
+    var JXTClass = this.getDefinition(xml.localName, xml.namespaceURI, false, allowNoNamespace);
     if (JXTClass) {
         return new JXTClass(null, xml);
     }
@@ -91,6 +96,8 @@ JXT.prototype.extend = function (ParentJXT, ChildJXT, multiName) {
     var qName = ChildJXT.prototype._NS + '|' + ChildJXT.prototype._EL;
 
     this._LOOKUP[qName] = ChildJXT;
+    this._LOOKUP_NO_NS[ChildJXT.prototype._EL] = ChildJXT;
+
     if (!this._LOOKUP_EXT[qName]) {
         this._LOOKUP_EXT[qName] = {};
     }
@@ -121,6 +128,7 @@ JXT.prototype.define = function (opts) {
 
     var name = ns + '|' + el;
     this._LOOKUP[name] = Stanza;
+    this._LOOKUP_NO_NS[el] = Stanza;
 
     tags.forEach(function (tag) {
         if (!self._TAGS[tag]) {
