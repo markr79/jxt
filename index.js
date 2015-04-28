@@ -13,6 +13,7 @@ function JXT() {
     this._LOOKUP = {};
     this._LOOKUP_NO_NS = {};
     this._LOOKUP_EXT = {};
+    this._LOOKUP_NS = {};
     this._TAGS = {};
     this._CB_DEFINITION = {};
     this._CB_TAG = {};
@@ -42,6 +43,10 @@ JXT.prototype.getDefinition = function (el, ns, required, allowNoNamespace) {
 
 JXT.prototype.getExtensions = function (el, ns) {
     return this._LOOKUP_EXT[ns + '|' + el] || {};
+};
+
+JXT.prototype.getNamespace = function (el) {
+    return this._LOOKUP_NS[el];
 };
 
 JXT.prototype.withDefinition = function (el, ns, cb) {
@@ -94,7 +99,7 @@ JXT.prototype.extend = function (ParentJXT, ChildJXT, multiName) {
     var parentName = ParentJXT.prototype._NS + '|' + ParentJXT.prototype._EL;
     var name = ChildJXT.prototype._name;
     var qName = ChildJXT.prototype._NS + '|' + ChildJXT.prototype._EL;
-
+    // console.log('>>> jxt:extend', parentName, name, qName);
     this._LOOKUP[qName] = ChildJXT;
     this._LOOKUP_NO_NS[ChildJXT.prototype._EL] = ChildJXT;
 
@@ -129,6 +134,7 @@ JXT.prototype.define = function (opts) {
     var name = ns + '|' + el;
     this._LOOKUP[name] = Stanza;
     this._LOOKUP_NO_NS[el] = Stanza;
+    this._LOOKUP_NS[el] = ns;
 
     tags.forEach(function (tag) {
         if (!self._TAGS[tag]) {
