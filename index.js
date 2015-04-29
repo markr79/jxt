@@ -76,8 +76,8 @@ JXT.prototype.tagged = function (tag) {
     return this._TAGS[tag] || [];
 };
 
-JXT.prototype.build = function (xml) {
-    var JXTClass = this._LOOKUP[xml.namespaceURI + '|' + xml.localName];
+JXT.prototype.build = function (xml, allowNoNamespace) {
+    var JXTClass = this.getDefinition(xml.localName, xml.namespaceURI, false, allowNoNamespace);
     if (JXTClass) {
         return new JXTClass(null, xml);
     }
